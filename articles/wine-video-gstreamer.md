@@ -3,7 +3,7 @@ title: "Wineの動画再生のしくみ、DirectShowとGStreamerの関係"
 emoji: "🍷"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["wine", "gstreamer", "directshow", "linux", "windows"]
-published: false
+published: true
 ---
 
 ## Wineとは
