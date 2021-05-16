@@ -2,7 +2,7 @@
 title: "Pion WebRTC で RTCP Feedback を受け取る"
 emoji: "️🎞️"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["webrtc", "sctp", "pion", "go"]
+topics: ["webrtc", "rtp", "pion", "go"]
 published: true
 ---
 
