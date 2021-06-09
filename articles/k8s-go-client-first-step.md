@@ -50,8 +50,8 @@ type NamespaceInterface interface {
 
 | 型 | 所属パッケージ | repository |
 |:---|:---|:--|
-|`metav1.ListOptions`|`k8s.io/apimachinery`| https://github.com/kubernetes/apimachinery |
-|`v1.NamespaceList`|`k8s.io/api`| https://github.com/kubernetes/api |
+|`metav1.ListOptions`|`k8s.io/apimachinery/pkg/apis/meta/v1`| https://github.com/kubernetes/apimachinery |
+|`v1.NamespaceList`|`k8s.io/api/core/v1`| https://github.com/kubernetes/api |
 
 どちらもKubernetes内部の型定義ではありそうですが、何が違うのでしょうか？
 筆者も最初は全然わからなかったのですが、Twitterで @go_vargo さんから教えていただきました。
