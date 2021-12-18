@@ -62,7 +62,7 @@ Webブラウザからアクセスするためにはまだ必要な要素が残�
 
 確かに公式ドキュメントには「Serviceによって、アプリケーションはトラフィックを受信できるようになります」と書いてあるのに、Serviceでは足りないのはなぜでしょうか？
 
-それは、ローカル環境だからです。公式ドキュメントはあくまで**Kubernetes本体のドキュメントであり、その下にある環境固有の条件については言及していない**のです。
+それは、ローカル環境だからです。公式ドキュメントはあくまで**Kubernetesのドキュメントであり、Kubernetes自体を動かす環境固有の条件については言及していない**のです。
 
 実際はKubernetesクラスタはminikube環境に閉じ込められており、次のような構造になっています。
 
@@ -89,34 +89,99 @@ minikube service hello-minikube
 🎉  Opening service default/hello-minikube in default browser...
 ```
 
-また、この方法以外にも次のコマンドも紹介されています。
+よって、minikubeの外側と内側の経路を作るのは `minikube service` コマンドとなります。
 
-```
-kubectl port-forward service/hello-minikube 7080:8080
-```
-
-よって、minikubeの外側と内側の経路を作るのは `minikube service` コマンドまたは `minikube port-forward` コマンドとなります。
-
-![](https://storage.googleapis.com/zenn-user-upload/d6c4c6dce402-20211219.png)
+![](https://storage.googleapis.com/zenn-user-upload/093527f92fd4-20211219.png)
 
 つまり、minikube内のPodへ外部からアクセスするには2段階の経路が必要になります。
 なぜ2段階に分かれているのでしょうか、Serviceに直接アクセスではダメなのでしょうか？その理由を探ります。
 
 ## minikubeと仮想化技術
 
-そもそもKubernetesは基本的にLinuxマシンで動かす想定のソフトウェアです。よって、WindowsやMacでは何らかの仮想化が必要です。
+Kubernetesはminikube環境の中に閉じ込められていると書きましたが、minikube環境とはどういう実体なのでしょうか。
 
-仮想的なLinuxマシンを動かすとなると、DockerやVirtualBox, WSL2, limaなどが選択肢としてあがります。minikubeはどの仮想化技術を使うか選択できる仕組みを持っていて、それぞれの技術はDriverと呼ばれます。次のドキュメントにDriverの一覧が書かれています。
+そもそもKubernetesは基本的にLinuxマシンで動かす想定のソフトウェアです。よって、WindowsやMacでは何らかの仮想化が必要です。
+仮想的なLinuxマシンを動かすとなると、DockerやVirtualBox, Hyperkitなどが選択肢としてあがります。そこでminikubeはどの仮想化技術を使うか選択できる仕組みを持っていて、それぞれの技術はDriverと呼ばれます。次のドキュメントにDriverの一覧が書かれています。
 
 [Drivers | minikube](https://minikube.sigs.k8s.io/docs/drivers/)
 
 ページを見ると各OSごとに多くのDriverが用意されていることがわかります。
-つまり、仮想化技術は色々あってそれぞれにおいて**外から内部への経路を通す方法が異なる** のです。
 
-たとえば、Docker
+どのDriverを使っているのかは `minikube start` 時に出力されます。たとえばmacOSでhyperkit driverが選ばれた場合は次のような表示になります。
+何も指定しない場合、minikubeが推奨するdriverを自動で選んでくれますが、これはフラグで変更することもできます。
 
-### WSL2の場合
+```
+$ minikube start
+😄  Darwin 11.6 上の minikube v1.16.0
+✨  hyperkitドライバーが自動的に選択されました
+👍  コントロールプレーンのノード minikube を minikube 上で起動しています
+🔥  hyperkit VM (CPUs=2, Memory=6000MB, Disk=20000MB) を作成しています...
+...
+```
 
-WSL2の場合は
+つまり、仮想化技術は色々あってそれぞれ**外から内部への経路を通す方法が異なる** のです。
+たとえば同じWindowsであっても、Hyper-V driverとDocker driverでは経路を通す方法が異なります。
+この経路を通す処理を裏でいい感じにやってくれるのが `minikube service` コマンドです。
+コマンドのソースを読むと、`NeedsPortForward` 関数の判断により必要に応じてPort Forwardingを自動的にやってくれています。
+
+https://github.com/kubernetes/minikube/blob/69d5d34eeb4d5f3ad963c544773dd088d6550821/cmd/minikube/cmd/service.go#L95
+
+## まとめ
+
+minikubeはKubernetesに必要なLinux用のコンポーネントを仮想化技術を使って動かしています。
+よって、**Kubernetesの外側にさらに仮想化の枠がついている** ため、Kubernetesの外部（ローカル環境のホストPC）からPodへアクセスするには2段階の経路を作る必要があります。
+
+たとえばDocker driverを使うと、Dockerコンテナの上でKubernetesのコンポーネントが動きます。
+Kubernetes自体がコンテナを管理するツールなのに、そのKubernetes自体がコンテナの中にあって……？？？となり難易度が高いですね。
+その上Docker以外のdriverも多くあり、それぞれについてネットワークの経路を開ける方法が異なってたりします。
+
+![](https://storage.googleapis.com/zenn-user-upload/2495bb6454f6-20211219.png)
+
+さらに、最近はApple Silicon(M1)の登場により仮想化技術の互換性がなくなったり、[Docker Desktopの企業利用の有料化](https://www.docker.com/blog/updating-product-subscriptions/)の影響でWindows/MacにおけるDockerのプラクティスが定まらず情報が錯綜していて初学者にはつらい状況です。
+
+とにかく、このあたりのネットワークの情報を調べるコツは、**どこまでがKubernetesの話で、どこからが仮想化技術(minikubeのDriver)の話なのかを意識すること** 、そして自分が何のDriverを使っているかを知っておくことだと思います。
+
+Apple SiliconもDocker desktopの有料化も主に仮想化技術の方の話題であって、Kubernetes本体のServiceをはじめとするネットワークの概念はここ最近では変わっていません。
+Kubernetesをまずはローカル環境で学習しようと試みてネットワーク周りで混乱するのはKubernetesの難しさではなく、その下にある仮想化技術の難しさかもしれません。
+
+## その他細かい話
+
+### kubectl port-forward
+
+[Get Started](https://minikube.sigs.k8s.io/docs/start/)では `minikube service` コマンド以外の方法として、`kubectl port-forward` コマンドというのも紹介されています。
+
+`kubectl port-forward` コマンドはまた別の方法を使って経路を作っています。
+Serviceの名前で指定はできますが、内部的にはPodへの直通経路を開けている形になっているようです。
+
+![](https://storage.googleapis.com/zenn-user-upload/309af368d76b-20211219.png)
+
+詳しくは[kubectl port-forwardの仕組み | 日々修行](https://ytsuboi.jp/archives/614) の記事が参考になります。
+
+### minikube tunnel
+
+さらに応用として[minikube tunnel](https://minikube.sigs.k8s.io/docs/commands/tunnel/)コマンドがあります。
+これを使うとなんと、`minikube service` コマンドや `kubectl port-forward` コマンドを使わずともServiceに直接アクセスができます。
+
+// TODO:
+
+### WSL2, Lima
+
+[WSL2](https://docs.microsoft.com/ja-jp/windows/wsl/install)はWindows上で仮想Linuxマシンを動かす技術のひとつです。WSL2でminikubeを使いたい場合、複数のやり方があります。
+
+- Docker desktopを使う方法
+- WSL2上にLinux版Dockerを入れる方法
+
+https://kubernetes.io/blog/2020/05/21/wsl-docker-kubernetes-on-the-windows-desktop/
+
+WSL2自体も仮想マシンです。よってWSL2の内部はほぼLinuxです。
+なので、WSL2のシェル上でminikubeを実行すると、Linux環境でminikubeを実行したのと近い環境になります。
+
+さらに、WSL2側の工夫により `localhost` アドレスでWSL2内部に直接アクセスできる機能があります。これを使うとWindows側のWebブラウザからWSL2のLinux内で起動しているアプリケーションに http://localhost/... で直接アクセスできます。まるで仮想マシンなどないかのように感じてしまいますが、WSL2は仮想マシンであるという前提を忘れず常に意識することで、Kubernetesローカル環境の理解もしやすいはずです。
 
 https://devblogs.microsoft.com/commandline/whats-new-for-wsl-in-insiders-preview-build-18945/#use-localhost-to-connect-to-your-linux-applications-from-windows
+
+次に、[Lima](https://github.com/lima-vm/lima)はmacOS上で仮想Linuxマシンを動かす技術です。
+
+LimaもWSL2似ています。LimaはmacOS上でLinuxの仮想マシンを実行していますが、WSL2と同様に `localhost` アドレスを自動的にLima内のLinuxアプリケーションに通してくれる機能が標準搭載されているため、mac側のWebブラウザから http://localhost/... で直接アクセスできます。
+
+https://github.com/lima-vm/lima/blob/master/README.md#lima-linux-virtual-machines-on-macos-in-most-cases
