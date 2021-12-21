@@ -3,7 +3,7 @@ title: "ローカルKubernetes環境のネットワークを攻略する"
 emoji: "☸"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["kubernetes"]
-published: false
+published: true
 ---
 
 この記事は[Kubernetes Advent Calendar その2](https://qiita.com/advent-calendar/2021/kubernetes) 21日目の記事です。
