@@ -6,7 +6,7 @@ topics: ["kubernetes"]
 published: true
 ---
 
-この記事は[Kubernetes Advent Calendar その2](https://qiita.com/advent-calendar/2021/kubernetes) 21日目の記事です。
+この記事は[Kubernetes Advent Calendar](https://qiita.com/advent-calendar/2021/kubernetes) 22日目の記事です。
 
 ---
 
@@ -135,10 +135,10 @@ Kubernetesはコンテナを管理するツールなのにそれ自体がコン�
 
 ![](https://storage.googleapis.com/zenn-user-upload/2495bb6454f6-20211219.png)
 
-Dockerもまた基本Linuxで動かす前提のソフトウェアなのでWindows, macOSで使うにはやはり何らかの仮想化技術が必要です。[Docker Desktop](https://www.docker.com/products/docker-desktop)はそのあたりをいい感じに裏で構築してくれるソフトウェアです。Docker Desktopを使えば自前で仮想化の構築をせずにDockerが使える状態にしてくれます。
+Dockerもまた基本Linuxで動かす前提のソフトウェアなのでWindows, macOSで使うにはやはり何らかの仮想化技術が必要です。[Docker Desktop](https://www.docker.com/products/docker-desktop)はそのあたりをいい感じに裏で構築してくれるソフトウェアです。Docker Desktopを使えば自前で仮想マシンの構築をせずにDockerが使える状態にしてくれます。
 
 しかし、[Docker Desktopの企業利用の有料化](https://www.docker.com/blog/updating-product-subscriptions/)の影響でWindows/macOSにおいてはDocker Desktopを使わずにDockerを動かしたいという需要も高まっています。
-そこで、Docker desktopを使わず **Linuxの仮想マシンを自前でひとつ立てておいて、その上でLinux版のDockerを使う** という手法が注目されています。代表的な例がWSL2やLimaです。
+そこで、Docker desktopを使わず **Linuxの仮想マシンを事前にひとつ立てておいて、その上でLinux版のDockerを使う** という手法が注目されています。代表的な例がWSL2やLimaです。
 
 Docker driverの時点でかなり階層が深いのに、さらにそれを仮想マシンで閉じ込めるので大変ややこしいですね。こうなるとPodへのアクセス経路はどうなるのでしょうか？
 
