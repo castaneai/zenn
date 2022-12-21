@@ -310,6 +310,11 @@ Port forwarding pod/main in namespace default, remote port 56268 -> http://127.0
 ![](https://storage.googleapis.com/zenn-user-upload/c895f05ed844-20221221.png)
 画像: [Google Cloudのブログ記事](https://cloud.google.com/blog/products/devops-sre/announcing-cloud-code-accelerating-cloud-native-application-development) より引用
 
-また、デバッグ機能も搭載されておりやはり内部的にはSkaffold debugが使われているようです。よって、GKE上で開発する際はCloud Codeを使うとより管理が楽になるかもしれません。
+また、デバッグ機能も搭載されておりやはり内部的にはSkaffold debugが使われているようです。よって、GKE（またはCloud Run）を使う際はCloud Codeを使うとより管理が楽になるかもしれません。
 
-しかし、内部的に何が起こっているのか把握しないままクラウドのリソースを操作するのは少し怖さも感じます。筆者の個人的な感想ですがCloud Codeを使うなら一度はSkaffold単体を使って何が起こっているか把握してからにしたほうがいいのかなと思います。
+しかし、内部的に何が起こっているのか把握しないままクラウドのリソースを操作するのは少し怖さも感じます。筆者の個人的な感想ですがCloud Codeを使うなら一度はSkaffold単体を使って何が起こっているか把握してからにしたほうがいいのかなと思いました。
+
+# まとめ
+
+Delveを使ったGoアプリケーションのデバッグは、ローカル実行だけでなくKubernetes上のコンテナに対しても通用します。
+さらに、Skaffoldを使うとデバッグ用イメージの構築や反映、ポートフォワーディングも自動化してくれるため非常に快適にデバッグが可能です。Kubernetes環境はデバッグがやりづらそうで不安…という方はぜひ試してみてください。
