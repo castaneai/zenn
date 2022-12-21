@@ -3,7 +3,7 @@ title: "Kubernetes上のGoアプリケーションにデバッガーを接続す
 emoji: "🗂"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["kubernetes", "go", "skaffold"]
-published: false
+published: true
 ---
 
 Go製のアプリケーション対して[Delve](https://github.com/go-delve/delve)というツールを使ってデバッグができます。
